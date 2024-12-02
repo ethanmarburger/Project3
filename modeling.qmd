@@ -173,13 +173,94 @@ classification_extract_final_model <- extract_workflow(classification_final_fit)
 classification_extract_final_model
 ```
 
-### Reporting the final LASSO coefficients table
-
-```{r}
-classification_extract_final_model |>
-  extract_fit_engine() |>
-  rpart.plot::rpart.plot(roundint = FALSE)
-```
 
 ## Fitting a tuned Random Forest model
 
+### Creating a Random Forest Instance
+
+```{r}
+rf_spec <- rand_forest(mtry = tune()) |>
+ set_engine("ranger", importance = "impurity") |>
+ set_mode("classification")
+```
+
+### Random Forest workflow
+
+```{r}
+rf_wkf <- workflow() |>
+ add_recipe(rec) |> # Recipe
+ add_model(rf_spec) # Defined model instance
+```
+
+### CV to Select our Tuning Parameters
+
+```{r}
+rf_fit <- rf_wkf |>
+ tune_grid(resamples = data_5_fold,
+ grid = 10,
+ metrics = metric_set(mn_log_loss)) # defining model metrics
+```
+
+### Pulling out model metrics
+
+```{r}
+rf_fit |>
+ collect_metrics() |> # Collecting defined model metrics
+ filter(.metric == "mn_log_loss") |>
+ arrange(mean) # Arranged by mean RMSE value
+```
+
+### Using select_best() to grab the best models tuning parameter values
+
+```{r}
+rf_best_params <- rf_fit |>
+  select_best(metric = "mn_log_loss") # defining the metric
+rf_best_params
+```
+
+### Finalizing our model on the training set by fitting this chosen model via finalize_workflow()
+
+```{r}
+rf_final_wkf <- rf_wkf |>
+ finalize_workflow(rf_best_params)
+```
+
+### Fitting the best model to the entire training data set to test on the testing set
+
+```{r}
+rf_final_fit <- rf_final_wkf |>
+ last_fit(data_split, metrics = metric_set(mn_log_loss)) # defining model metrics
+rf_final_fit
+
+rf_final_fit |>
+  collect_metrics() # Collecting by defined model metrics
+```
+
+### Extracting the final model fit for the Random Forest model
+
+```{r}
+# final model fits
+rf_final_model <- extract_fit_engine(rf_final_fit) 
+rf_final_model
+```
+## Comparing Best Models
+
+### Best Classification Tree Model
+
+```{r}
+classification_final_fit |>
+  collect_metrics() # collecting defined model metrics
+```
+
+### Best Random Forest Model
+
+```{r}
+rf_final_fit |>
+  collect_metrics() # Collecting by defined model metrics
+```
+
+### Which Model is the Best?
+
+**Best model: Random Forest**
+
+**The Random Forest model has a slightly better log-loss estimate of 0.339 while the Classification Tree model has a log-loss estimate of 0.358 (rounded)**
