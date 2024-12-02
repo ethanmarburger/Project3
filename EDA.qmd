@@ -10,44 +10,43 @@ editor: visual
 
 #### About the dataset:
 
-The data for this project is from **Diabetes Health Indicators Dataset**. This dataset was put together from the Center of Disease Control's (CDC) Behavior Risk Factor Surveillance System (BRFSS) in 2015. The BRFSS is a premier telephone health-related telephone survey designed to collect state data about United States residents regarding their health-related risk behaviors, chronic health conditions, and use of preventive services.
+The data for this project is from **Diabetes Health Indicators Dataset**. This dataset was put together from the Center of Disease Control's (CDC) Behavior Risk Factor Surveillance System (BRFSS) in 2015. The BRFSS is a premier telephone health-related telephone survey designed to collect state data about United States residents regarding their health-related risk behaviors, chronic health conditions, and use of preventive services. We are particularly interested in the indicators for Diabetes.
 
 #### Variables from the dataset that we'll work with:
 
-Diabetes_binary: If subject has diabetes or not.
+**Diabetes_binary**: If subject has diabetes or not. While the dataset source mentions a prediabetes level, there are no corresponding values in the dataset.
 
 0 = no diabetes\
-1 = prediabetes\
-2 = diabetes
+1 = diabetes
 
-HighBP: If subject has high blood pressure or not.
+**HighBP**: If subject has high blood pressure or not.
 
 0 = no high blood pressure\
 1 = high blood pressure
 
-HighChol: If subject has high cholesterol or not.
+**HighChol**: If subject has high cholesterol or not.
 
 0 = no high cholesterol\
 1 = high cholesterol
 
-CholCheck: If subject has had their cholesterol checked in the past 5 years.
+**CholCheck**: If subject has had their cholesterol checked in the past 5 years.
 
 0 = no cholesterol check in 5 years\
 1 = yes cholesterol check in 5 years
 
-BMI: Body Mass Index.
+**BMI**: Body Mass Index.
 
-PhysActivity: Physical activity in past 30 days - not including job.
+**PhysActivity**: Physical activity in past 30 days - not including job.
 
 0 = no\
 1 = yes
 
-Sex: Is the subject male or female.
+**Sex**: Is the subject male or female.
 
 0 = female\
 1 = male
 
-Age: Thirteen level category indicating the age of the subject.
+**Age**: Thirteen level category indicating the age of the subject.
 
 1 = 18-24\
 2 = 25-29\
@@ -67,7 +66,7 @@ Age: Thirteen level category indicating the age of the subject.
 
 The purpose of Exploratory Data Analysis (EDA) is to understand the underlying structure, patterns, and relationships in a dataset before applying statistical models or making predictions. EDA serves as a critical first step in data analysis to ensure data quality and to guide further analysis or modeling efforts.
 
-#### Untiimate goal of modeling:
+#### Ultimate goal of modeling:
 
 The ultimate goal of modeling in data science and statistics is to create a representation of the data's underlying processes that can be used to 1) Explain Relationships, 2) Make Predictions, 3) Optimize Systems, 4) Classify or Group Data, 5) Identify Key Variable, 6) Reduce Complexity, 7) Generate Insights, and 8) Facilitate Generalization.
 
@@ -83,13 +82,14 @@ library(forcats)
 ```
 
 ```{r}
+#| echo: false
 # Reading in CSV file using relative path
-diabetes <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+data <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
 ```
 
 ```{r}
 # Selecting chosen variables
-diabetes <- diabetes |>
+data <- data |>
   select(Diabetes_binary, HighBP, HighChol, CholCheck, BMI, PhysActivity, Sex, Age)
 ```
 
@@ -99,26 +99,31 @@ diabetes <- diabetes |>
 
 ```{r}
 # Seeing how the variables are stored
-str(diabetes)
+str(data)
 ```
 
 #### Basic Data Validation
 
 ```{r}
 # Column names
-names(diabetes)
+names(data)
+```
+
+```{r}
+# Looking at unique values in the Diabetes_binary variable
+unique(data$Diabetes_binary)
 ```
 
 ```{r}
 # Quick numeric summary of data
-summary(diabetes)
+summary(data)
 ```
 
 #### Looking for Missing Values
 
 ```{r}
 # Using tidy syntax to look for missing values
-diabetes |>
+data |>
   is.na() |>
   colSums()
 ```
@@ -128,8 +133,9 @@ diabetes |>
 #### Applying Transformations
 
 ```{r}
-diabetes <- diabetes |>
+data <- data |>
   mutate(
+    # Convert variables to factors
     diabetes = as.factor(Diabetes_binary),
     high_bp = as.factor(HighBP),
     high_chol = as.factor(HighChol),
@@ -137,9 +143,11 @@ diabetes <- diabetes |>
     physical_act = as.factor(PhysActivity),
     sex = as.factor(Sex),
     age = as.factor(Age),
+    
+    # Recode factor levels
     diabetes = fct_recode(diabetes,
-                          No = "0",
-                          Yes = "1"),
+                          `No Diabetes` = "0",
+                          Diabetes = "1"),
     high_bp = fct_recode(high_bp,
                          No = "0",
                          Yes = "1"),
@@ -169,6 +177,7 @@ diabetes <- diabetes |>
                      `70-74` = "11",
                      `75-79` = "12",
                      `80_or_older` = "13")) |>
+  # Remove original variables
   select(-Diabetes_binary, -HighBP, -HighChol, -CholCheck, -PhysActivity, -Sex, -Age)
 ```
 
@@ -176,30 +185,43 @@ diabetes <- diabetes |>
 
 ```{r}
 # Investigating the Response Variable
-table("diabetes" = diabetes$diabetes)
+table("diabetes" = data$diabetes)
 ```
 
 ```{r}
 # Investigating the Response Variable and Blood Pressure
-table("diabetes" = diabetes$diabetes,
-      "High Blood Pressure" = diabetes$high_bp)
+table("diabetes" = data$diabetes,
+      "High Blood Pressure" = data$high_bp)
 ```
 
 ```{r}
 # Investigating the Response Variable and Cholesterol
-table("diabetes" = diabetes$diabetes,
-      "High Cholesterol" = diabetes$high_chol)
+table("diabetes" = data$diabetes,
+      "High Cholesterol" = data$high_chol)
 ```
 
 ```{r}
 # Investigating the Response Variable and Sex
-table("diabetes" = diabetes$diabetes,
-      "Sex" = diabetes$sex)
+table("diabetes" = data$diabetes,
+      "Sex" = data$sex)
+```
+
+```{r}
+# Investigating the Response Variable by Sex and Blood Pressure
+table("diabetes" = data$diabetes,
+      "High Blood Pressure?" = data$high_bp,
+      "Sex" = data$sex)
+```
+
+```{r}
+# Investigating the Response Variable and Age
+table("diabetes" = data$diabetes,
+      "Age Range" = data$age)
 ```
 
 ```{r}
 # Measure of center and spread for BMI grouped by diabetes
-diabetes |>
+data |>
   group_by(diabetes) |>
   summarize(across("BMI", 
                    .fns = c("mean" = mean,
@@ -215,48 +237,69 @@ diabetes |>
 
 ```{r}
 # Bar plot
-ggplot(diabetes, aes(x = diabetes)) +
+ggplot(data, aes(x = diabetes)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Distribution of Diabetes Binary Factor",
-       x = "Diabetes",
-       y = "Count")
+  labs(title = "Distribution of Individuals with Diabetes",
+       x = "Diabetes?",
+       y = "Count") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+\*\*
+
+```{r}
+# Stacked bar plot
+ggplot(data, aes(x = diabetes, fill = sex)) +
+  geom_bar(position = "fill") +
+  labs(title = "Proportion of Diabetes by Sex",
+       x = "Diabetes?",
+       y = "Proportion") +
+  scale_fill_manual(values = c("skyblue", "salmon")) +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ```{r}
 # Stacked bar plot
-ggplot(diabetes, aes(x = diabetes, fill = sex)) +
+ggplot(data, aes(x = diabetes, fill = physical_act)) +
   geom_bar(position = "fill") +
-  labs(title = "Proportion of Diabetes by Gender",
-       x = "Gender",
+  labs(title = "Proportion of Diabetes by Physical Activity in the Last 30 Days",
+       x = "Diabetes?",
        y = "Proportion") +
-  scale_fill_manual(values = c("skyblue", "salmon"))
+  scale_fill_manual(values = c("skyblue", "salmon")) +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ```{r}
-# Stacked bar plot
-ggplot(diabetes, aes(x = diabetes, fill = physical_act)) +
+ggplot(data, aes(x = diabetes, y = BMI)) +
+  geom_jitter(aes(color = sex)) +
+  labs(title = "Diabetes and Body Mass Index by Sex",
+       x = "Diabetes?",
+       y = "BMI") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+# Proportional bar plot for Diabetes by Physical Activity and Age
+ggplot(data, aes(x = diabetes, fill = physical_act)) +
   geom_bar(position = "fill") +
-  labs(title = "Proportion of Diabetes by Gender",
-       x = "Gender",
+  labs(title = "Proportion of Diabetes by Physical Activity and Age",
+       x = "Diabetes?",
        y = "Proportion") +
-  scale_fill_manual(values = c("skyblue", "salmon"))
+  scale_fill_manual(values = c("skyblue", "salmon")) +
+  facet_wrap(~age) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.text.x = element_text(angle = 60, hjust = 1))  # Rotate x-axis text
 ```
 
 ```{r}
-ggplot(diabetes, aes(x = diabetes, y = BMI)) +
-  geom_jitter(aes(color = sex))
-```
-
-```{r}
-ggplot(diabetes, aes(x = diabetes, y = BMI)) +
-  geom_jitter(aes(color = sex), width = 0.2, height = 0) + # Adjusting jitter for readability
-  facet_wrap(~age) + # Facet by age
-  labs(
-    title = "BMI by Diabetes Status Faceted by Age",
-    x = "Diabetes Status",
-    y = "BMI",
-    color = "Sex"
-  ) +
-  theme_minimal() +
-  theme(strip.text = element_text(size = 12)) # Adjust facet label size
+# Proportional bar plot for Diabetes by Sex and Blood pressure
+ggplot(data, aes(x = diabetes, fill = high_bp)) +
+  geom_bar(position = "fill") +
+  labs(title = "Proportion of Diabetes by Physical Activity and Age",
+       x = "Diabetes?",
+       y = "Proportion") +
+  scale_fill_manual(values = c("skyblue", "salmon")) +
+  facet_wrap(~sex) +
+  theme(plot.title = element_text(hjust = 0.5))
 ```

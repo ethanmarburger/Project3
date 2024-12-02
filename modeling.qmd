@@ -1,0 +1,115 @@
+---
+title: "Final Proejct: Modeling File"
+format: html
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| include: false
+library(tidymodels)
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+library(parsnip)
+library(tune)
+library(ggcorrplot)
+library(tree)
+library(baguette)
+library(ranger)
+library(rpart.plot)
+```
+
+## Introduction
+
+### About the dataset:
+
+The data for this project is from **Diabetes Health Indicators Dataset**. This dataset was put together from the Center of Disease Control's (CDC) Behavior Risk Factor Surveillance System (BRFSS) in 2015. The BRFSS is a premier telephone health-related telephone survey designed to collect state data about United States residents regarding their health-related risk behaviors, chronic health conditions, and use of preventive services. We are particularly interested in the indicators for Diabetes.
+
+### Transformed variables from the dataset that we'll work with:
+
+**diabetes**: If subject has diabetes or not. While the dataset source mentions a prediabetes level, there are no corresponding values in the dataset.
+
+No Diabetes = no diabetes\
+Diabetes = has diabetes
+
+**high_bp**: If subject has high blood pressure or not.
+
+No = no high blood pressure\
+Yes = high blood pressure
+
+**high_chol**: If subject has high cholesterol or not.
+
+No = no high cholesterol\
+Yes = high cholesterol
+
+**chol_check**: If subject has had their cholesterol checked in the past 5 years.
+
+No = cholesterol not check in past 5 years\
+Yes = cholesterol checked in past 5 years
+
+**BMI**: Body Mass Index.
+
+**physical_act**: Physical activity in past 30 days - not including job.
+
+No = no\
+Yes = yes
+
+**Sex**: Is the subject male or female.
+
+Female = female\
+Male = male
+
+**Age**: Thirteen level category indicating the age of the subject.
+
+Age Ranges\
+18-24\
+25-29\
+30-34\
+35-39\
+40-44\
+45-49\
+50-54\
+55-59\
+60-64\
+65-69\
+70-74\
+75-79\
+80 or older
+
+### Purpose of this File:
+
+The goal of this file is to create models for predicting the diabetes variable. We'll be predicting this variable using Classification Tree and Random Forest models. To evaluate the our models, we'll use log-loss as our chosen metric. Additionally, we'll be using 5 fold cross-validation to select the best model from that family of models.
+
+## Predictive Modeling Set up
+
+### Splitting Data into Training and Test Sets
+
+```{r}
+# Setting a seed to make things reproducible
+set.seed(23)
+
+# tidy models to split the data into a training and test set (70/30 split)
+data_split <- initial_split(data, prop = 0.70)
+data_train <- training(data_split)
+data_test <- testing(data_split)
+
+# 5 fold cross validation on the training set
+data_5_fold <- vfold_cv(data_train, 5)
+```
+
+### Create our Recipe for Data Preprocessing
+
+```{r}
+rec <- recipe(diabetes ~ ., data = data) |>
+  step_dummy(high_bp, high_chol, chol_check, physical_act, sex, age) |>
+  step_normalize(BMI)
+```
+
+## Fitting a tuned Classification Tree model
+
+```{r}
+
+```
+
