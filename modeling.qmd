@@ -19,6 +19,7 @@ library(tree)
 library(baguette)
 library(ranger)
 library(rpart.plot)
+library(yardstick)
 ```
 
 ## Introduction
@@ -109,7 +110,76 @@ rec <- recipe(diabetes ~ ., data = data) |>
 
 ## Fitting a tuned Classification Tree model
 
-```{r}
+### Creating a Classification Tree model instance
 
+```{r}
+class_tree_mod <- decision_tree(tree_depth = tune(),
+                          min_n = 15,
+                          cost_complexity = tune()) |>
+  set_engine("rpart") |>
+  set_mode("classification")
 ```
+
+### Classification Workflow
+
+```{r}
+class_tree_wkf <- workflow() |>
+  add_recipe(rec) |>
+  add_model(class_tree_mod)
+```
+
+### Fit Classification Model with tune_grid() and grid_regular()
+
+```{r}
+classification_grid <- class_tree_wkf |>
+  tune_grid(resamples = data_5_fold,
+            grid = grid_regular(tree_depth(), cost_complexity(), levels = 10),
+            metrics = metric_set(mn_log_loss)) # Corrected metric
+```
+
+### Collecting the metrics computed across the folds for each tuning parameter
+
+```{r}
+classification_grid |>
+  collect_metrics() |> # collecting defining model metrics
+  filter(.metric == "mn_log_loss") # filter by defining model metrics
+```
+
+### Using select_best() to pull out best Classification model
+
+```{r}
+lowest_log_loss <- classification_grid |>
+  select_best(metric = "mn_log_loss")
+```
+
+### fit best Classification Tree model to the entire training set to see the model fit
+
+```{r}
+classification_final_fit <- class_tree_wkf |>
+  finalize_workflow(lowest_log_loss) |>
+  last_fit(data_split, metrics = metric_set(mn_log_loss)) # defining model metrics
+
+classification_final_fit |>
+  collect_metrics() # collecting defined model metrics
+```
+
+### Extracting the model fits for the Classification Tree model
+
+```{r}
+# Extract the final model fits
+classification_extract_final_model <- extract_workflow(classification_final_fit) 
+
+# View extracted final model fit
+classification_extract_final_model
+```
+
+### Reporting the final LASSO coefficients table
+
+```{r}
+classification_extract_final_model |>
+  extract_fit_engine() |>
+  rpart.plot::rpart.plot(roundint = FALSE)
+```
+
+## Fitting a tuned Random Forest model
 
