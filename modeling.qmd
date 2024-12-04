@@ -110,14 +110,18 @@ rec <- recipe(diabetes ~ ., data = data) |>
 
 ## Fitting a tuned Classification Tree model
 
+### What's a Classification Tree model? 
+
+Classification Trees are a type of decision tree model specifically designed for problems where the response variable is categorical, meaning it takes on discrete values, such as classes or labels. While similar in structure and approach to regression trees, which predict continuous numerical outcomes, classification trees aim to assign data points to specific categories based on the most prevalent class in a region.
+
 ### Creating a Classification Tree model instance
 
 ```{r}
-class_tree_mod <- decision_tree(tree_depth = tune(),
+class_tree_mod <- decision_tree(tree_depth = tune(), # Tuning parameters
                           min_n = 15,
                           cost_complexity = tune()) |>
   set_engine("rpart") |>
-  set_mode("classification")
+  set_mode("classification") # To classify the best predictor
 ```
 
 ### Classification Workflow
@@ -159,11 +163,12 @@ classification_final_fit <- class_tree_wkf |>
   finalize_workflow(lowest_log_loss) |>
   last_fit(data_split, metrics = metric_set(mn_log_loss)) # defining model metrics
 
+# Collecting full training set best model metrics 
 classification_final_fit |>
-  collect_metrics() # collecting defined model metrics
+  collect_metrics()
 ```
 
-### Extracting the model fits for the Classification Tree model
+### Extracting the model fits for the best Classification Tree model
 
 ```{r}
 # Extract the final model fits
@@ -173,15 +178,18 @@ classification_extract_final_model <- extract_workflow(classification_final_fit)
 classification_extract_final_model
 ```
 
-
 ## Fitting a tuned Random Forest model
+
+### What's a Random Forest model? 
+
+Random Forest models are an ensemble learning technique that builds upon the idea of bagged (bootstrap aggregated) tree models. They are designed to improve prediction accuracy and robustness while reducing overfitting. Random Forest models achieve this by combining multiple decision trees trained on bootstrap samples of the data and introducing randomness in the predictor selection process at each split.
 
 ### Creating a Random Forest Instance
 
 ```{r}
-rf_spec <- rand_forest(mtry = tune()) |>
+rf_spec <- rand_forest(mtry = tune()) |> # varying values for mrty
  set_engine("ranger", importance = "impurity") |>
- set_mode("classification")
+ set_mode("classification") # To classify best predictor
 ```
 
 ### Random Forest workflow
@@ -207,7 +215,7 @@ rf_fit <- rf_wkf |>
 rf_fit |>
  collect_metrics() |> # Collecting defined model metrics
  filter(.metric == "mn_log_loss") |>
- arrange(mean) # Arranged by mean RMSE value
+ arrange(mean) # Arranged by mean log-loss value
 ```
 
 ### Using select_best() to grab the best models tuning parameter values
@@ -243,7 +251,7 @@ rf_final_fit |>
 rf_final_model <- extract_fit_engine(rf_final_fit) 
 rf_final_model
 ```
-## Comparing Best Models
+## Comparing Best Models fit to entire training set. 
 
 ### Best Classification Tree Model
 

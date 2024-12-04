@@ -119,6 +119,8 @@ unique(data$Diabetes_binary)
 summary(data)
 ```
 
+**Every variable except BMI and Age are binary, as indicated CDC's dataset description as well as by the min and max values.**
+
 #### Looking for Missing Values
 
 ```{r}
@@ -135,7 +137,7 @@ data |>
 ```{r}
 data <- data |>
   mutate(
-    # Convert variables to factors
+    # Converting most variables to factors
     diabetes = as.factor(Diabetes_binary),
     high_bp = as.factor(HighBP),
     high_chol = as.factor(HighChol),
@@ -144,7 +146,7 @@ data <- data |>
     sex = as.factor(Sex),
     age = as.factor(Age),
     
-    # Recode factor levels
+    # Recoding factor levels to change the names of the values 
     diabetes = fct_recode(diabetes,
                           `No Diabetes` = "0",
                           Diabetes = "1"),
@@ -177,7 +179,7 @@ data <- data |>
                      `70-74` = "11",
                      `75-79` = "12",
                      `80_or_older` = "13")) |>
-  # Remove original variables
+  # Removing most original variables
   select(-Diabetes_binary, -HighBP, -HighChol, -CholCheck, -PhysActivity, -Sex, -Age)
 ```
 
@@ -188,11 +190,15 @@ data <- data |>
 table("diabetes" = data$diabetes)
 ```
 
+**Many more subjects without diabetes then with diabetes.**
+
 ```{r}
 # Investigating the Response Variable and Blood Pressure
 table("diabetes" = data$diabetes,
       "High Blood Pressure" = data$high_bp)
 ```
+
+**Roughly 62% of subjects without diabetes reported no high blood pressure and roughly 25% of subjects with diabetes reported no high blood pressure.***
 
 ```{r}
 # Investigating the Response Variable and Cholesterol
@@ -200,11 +206,15 @@ table("diabetes" = data$diabetes,
       "High Cholesterol" = data$high_chol)
 ```
 
+**There is roughly four times more people with high cholesterol without diabetes then with diabetes.**
+
 ```{r}
 # Investigating the Response Variable and Sex
 table("diabetes" = data$diabetes,
       "Sex" = data$sex)
 ```
+
+**The difference between males and females with diabetes in this study is roughly 1,500 people. In a dataset consisting of 253,680 people, this is exteremely close.**
 
 ```{r}
 # Investigating the Response Variable by Sex and Blood Pressure
@@ -213,11 +223,15 @@ table("diabetes" = data$diabetes,
       "Sex" = data$sex)
 ```
 
+**Similar to the last the contingency table, the number of males and females with and without diabetes and high blood pressure is very close.**
+
 ```{r}
 # Investigating the Response Variable and Age
 table("diabetes" = data$diabetes,
       "Age Range" = data$age)
 ```
+
+**Subjects in the age range of 65-69 made up the largest group of individuals with diabetes.** 
 
 ```{r}
 # Measure of center and spread for BMI grouped by diabetes
@@ -233,6 +247,8 @@ data |>
                    .names = "{.col}_{.fn}"))
 ```
 
+**The mean and median BMI values for individuals with and without diabetes are virtually the same.**
+
 #### Visualizing the Data
 
 ```{r}
@@ -245,7 +261,7 @@ ggplot(data, aes(x = diabetes)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-\*\*
+**It's interesting to visualize just how many less people there are with diabetes then without in this dataset.**
 
 ```{r}
 # Stacked bar plot
@@ -258,6 +274,8 @@ ggplot(data, aes(x = diabetes, fill = sex)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+**Again, the difference between males and females with diabetes in this study is roughly 1,500 people. It's interesting that more males have diabetes then females.**
+
 ```{r}
 # Stacked bar plot
 ggplot(data, aes(x = diabetes, fill = physical_act)) +
@@ -269,6 +287,8 @@ ggplot(data, aes(x = diabetes, fill = physical_act)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+**It's interesting, and unsurprising, that individuals with diabetes engage in less physical activity.** 
+
 ```{r}
 ggplot(data, aes(x = diabetes, y = BMI)) +
   geom_jitter(aes(color = sex)) +
@@ -277,6 +297,8 @@ ggplot(data, aes(x = diabetes, y = BMI)) +
        y = "BMI") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
+**The scatter plot clearly shows that individuals with diabetes tend to have a lower BMI.**
 
 ```{r}
 # Proportional bar plot for Diabetes by Physical Activity and Age
@@ -292,6 +314,8 @@ ggplot(data, aes(x = diabetes, fill = physical_act)) +
     axis.text.x = element_text(angle = 60, hjust = 1))  # Rotate x-axis text
 ```
 
+**It's interesting that at the lowest age range (18-24) the proportion of individuals with and without diabetes is the closest.**
+
 ```{r}
 # Proportional bar plot for Diabetes by Sex and Blood pressure
 ggplot(data, aes(x = diabetes, fill = high_bp)) +
@@ -303,3 +327,5 @@ ggplot(data, aes(x = diabetes, fill = high_bp)) +
   facet_wrap(~sex) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
+**It's interesting that the proportions of males and females with and without diabetes are similar.**
