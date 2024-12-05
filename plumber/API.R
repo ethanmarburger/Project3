@@ -12,7 +12,7 @@ library(yardstick)
 # Reading in Data
 data_api <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
 
-# Selecting desired vairables
+# Selecting desired variables
 data_api <- data_api |>
   select(Diabetes_binary, HighBP, HighChol, BMI, PhysActivity, Sex, Age)
 
@@ -65,11 +65,11 @@ set.seed(23)
 
 # tidy models to split the data into a training and test set (70/30 split)
 data_split_api <- initial_split(data_api, prop = 0.70, strata = diabetes)
-data_train_api <- training(data_split)
-data_test_api <- testing(data_split)
+data_train_api <- training(data_split_api)
+data_test_api <- testing(data_split_api)
 
 # 5 fold cross validation on the training set
-data_5_fold_api <- vfold_cv(data_train, 5)
+data_5_fold_api <- vfold_cv(data_train_api, 5)
 
 # Creating a recipe for data processing
 rec_api <- recipe(diabetes ~ ., data = data_api) |>
@@ -107,8 +107,21 @@ rf_final_wkf_api <- rf_wkf_api |>
   finalize_workflow(rf_best_params_api)
 
 # Fitting best Random Forest model to entire data set
-rf_final_fit_api <- rf_final_wkf_api |>
-  last_fit(data_api, metrics = metric_set(mn_log_loss)) # defining model metrics
+rf_final_fit_api <- rf_final_wkf_api |> 
+  fit(data = data_api)
+
+# Generating predictions for the entire dataset
+predictions <- predict(rf_final_fit_api, data_api) |> 
+  bind_cols(data_api)
+
+# Creating the confusion matrix
+conf_mat <- conf_mat(predictions, truth = diabetes, estimate = .pred_class)
+
+# Creating a confusion matrix plot
+conf_mat_plot <- autoplot(conf_mat, type = "heatmap") +
+  labs(title = "Confusion Matrix for Best Model",
+       subtitle = "Comparing Predictions to Actual Values") +
+  theme_minimal()
 
 #* @apiTitle Random Forest Prediction API
 #* @apiDescription A plumber build API that displays my best fitting Random Forest model on a subset of the CDC's Behavior Risk Factor Surveillance System data from 2015.
@@ -116,37 +129,31 @@ rf_final_fit_api <- rf_final_wkf_api |>
 #* Predict diabetes risk
 #* @param high_bp The high blood pressure status (default: "Yes")
 #* @param high_chol The high cholesterol status (default: "Yes")
-#* @param chol_check Cholesterol check status (default: "Yes")
 #* @param physical_act Physical activity status (default: "Yes")
 #* @param sex Sex of the individual (default: "Female")
 #* @param age Age group of the individual (default: "18-24")
 #* @param BMI Body Mass Index (default: 30)
-#* @post /predict
-function(high_bp = "Yes", high_chol = "Yes", chol_check = "Yes",
-         physical_act = "Yes", sex = "Female", age = "18-24", BMI = 30) {
+#* @get  /predict
+function(high_bp = "Yes", high_chol = "Yes", physical_act = "Yes", 
+         sex = "Female", age = "18-24", BMI = 30) {
   
-  # Creating a data frame with the input values
   input_data <- tibble(
     high_bp = as.factor(high_bp),
     high_chol = as.factor(high_chol),
-    chol_check = as.factor(chol_check),
     physical_act = as.factor(physical_act),
     sex = as.factor(sex),
     age = as.factor(age),
     BMI = as.numeric(BMI)
   )
   
-  # Using the trained model to predict
-  prediction <- predict(rf_final_fit_api$.workflow[[1]], input_data, type = "prob")
-  
-  # Returning the prediction
+  prediction <- predict(rf_final_fit_api, input_data, type = "prob")
   list(probabilities = prediction)
 }
 
 # Example function calls to test the endpoint:
-# 1. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=30&high_bp=No&high_chol=Yes&chol_check=Yes&physical_act=No&sex=Male&age=45-49"
-# 2. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=20&high_bp=Yes&high_chol=Yes&chol_check=No&physical_act=Yes&sex=Female&age=35-39"
-# 3. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=40&high_bp=No&high_chol=No&chol_check=Yes&physical_act=Yes&sex=Male&age=18-24"
+# 1. http://127.0.0.1:4230/predict?high_bp=Yes&high_chol=No&physical_act=Yes&sex=Female&age=18-24&BMI=20
+# 2. http://127.0.0.1:4230/predict?high_bp=No&high_chol=Yes&physical_act=Yes&sex=Female&age=25-29&BMI=30
+# 3. http://127.0.0.1:4230/predict?high_bp=Yes&high_chol=No&physical_act=Yes&sex=Female&age=30-34&BMI=40
 
 
 
@@ -156,7 +163,7 @@ function(high_bp = "Yes", high_chol = "Yes", chol_check = "Yes",
 function() {
   list(
     message = "Hello, my name is Ethan Marburger\ 
-    The folowing URL provides more information about the dataset as well as determining the best fitting model [TO DO: RENDER SITES AND CREATE URL]."
+    The folowing URL provides more information about the dataset as well as determining the best fitting model [https://ethanmarburger.github.io/Project3/EDA.html]."
   )
 }
 
@@ -167,15 +174,14 @@ function() {
 #* @get /confusion
 #* @serializer png
 function() {
-  # Generate predictions for the entire dataset
-  predictions <- predict(rf_final_fit_api$.workflow[[1]], data_api) |> 
-    bind_cols(data_api) |> 
-    mutate(.pred_class = as.factor(.pred_class))
+  # Generating predictions for the entire dataset
+  predictions <- predict(rf_final_fit_api, data_api, type = "class") |> 
+    bind_cols(data_api)
   
-  # Create the confusion matrix
+  # Creating the confusion matrix
   conf_mat <- conf_mat(predictions, truth = diabetes, estimate = .pred_class)
   
-  # Create a confusion matrix plot
+  # Creating a confusion matrix plot
   conf_mat_plot <- autoplot(conf_mat, type = "heatmap") +
     labs(title = "Confusion Matrix for Best Model",
          subtitle = "Comparing Predictions to Actual Values") +
@@ -184,3 +190,4 @@ function() {
   # Return the plot as a PNG image
   print(conf_mat_plot)
 }
+
