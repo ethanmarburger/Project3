@@ -151,7 +151,7 @@ function(high_bp = "Yes", high_chol = "Yes", physical_act = "Yes",
 }
 
 # Example function calls to test the endpoint:
-# 1. http://127.0.0.1:4230/predict?high_bp=Yes&high_chol=No&physical_act=Yes&sex=Female&age=18-24&BMI=20
+# 1. http://127.0.0.1:4230/predict?high_bp=Yes&high_chol=No&physical_act=Yes&sex=Male&age=18-24&BMI=20
 # 2. http://127.0.0.1:4230/predict?high_bp=No&high_chol=Yes&physical_act=Yes&sex=Female&age=25-29&BMI=30
 # 3. http://127.0.0.1:4230/predict?high_bp=Yes&high_chol=No&physical_act=Yes&sex=Female&age=30-34&BMI=40
 
