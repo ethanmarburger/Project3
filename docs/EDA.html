@@ -152,9 +152,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>HighChol</strong>: If subject has high cholesterol or not.</p>
 <p>0 = no high cholesterol<br>
 1 = high cholesterol</p>
-<p><strong>CholCheck</strong>: If subject has had their cholesterol checked in the past 5 years.</p>
-<p>0 = no cholesterol check in 5 years<br>
-1 = yes cholesterol check in 5 years</p>
 <p><strong>BMI</strong>: Body Mass Index.</p>
 <p><strong>PhysActivity</strong>: Physical activity in past 30 days - not including job.</p>
 <p>0 = no<br>
@@ -202,7 +199,7 @@ dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke,...
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selecting chosen variables</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Diabetes_binary, HighBP, HighChol, CholCheck, BMI, PhysActivity, Sex, Age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Diabetes_binary, HighBP, HighChol, BMI, PhysActivity, Sex, Age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="exploratory-data-analysis" class="level3">
@@ -213,11 +210,10 @@ dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke,...
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Seeing how the variables are stored</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>tibble [253,680 × 8] (S3: tbl_df/tbl/data.frame)
+<pre><code>tibble [253,680 × 7] (S3: tbl_df/tbl/data.frame)
  $ Diabetes_binary: num [1:253680] 0 0 0 0 0 0 0 0 1 0 ...
  $ HighBP         : num [1:253680] 1 0 1 1 1 1 1 1 1 0 ...
  $ HighChol       : num [1:253680] 1 0 1 0 1 1 0 1 1 0 ...
- $ CholCheck      : num [1:253680] 1 0 1 1 1 1 1 1 1 1 ...
  $ BMI            : num [1:253680] 40 25 28 27 24 25 30 25 30 24 ...
  $ PhysActivity   : num [1:253680] 0 1 0 1 1 1 0 1 0 0 ...
  $ Sex            : num [1:253680] 0 0 0 0 0 1 0 0 0 1 ...
@@ -231,8 +227,8 @@ dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke,...
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Column names</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Diabetes_binary" "HighBP"          "HighChol"        "CholCheck"      
-[5] "BMI"             "PhysActivity"    "Sex"             "Age"            </code></pre>
+<pre><code>[1] "Diabetes_binary" "HighBP"          "HighChol"        "BMI"            
+[5] "PhysActivity"    "Sex"             "Age"            </code></pre>
 </div>
 </div>
 <div class="cell">
@@ -246,20 +242,20 @@ dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke,...
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick numeric summary of data</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> Diabetes_binary      HighBP         HighChol        CholCheck     
- Min.   :0.0000   Min.   :0.000   Min.   :0.0000   Min.   :0.0000  
- 1st Qu.:0.0000   1st Qu.:0.000   1st Qu.:0.0000   1st Qu.:1.0000  
- Median :0.0000   Median :0.000   Median :0.0000   Median :1.0000  
- Mean   :0.1393   Mean   :0.429   Mean   :0.4241   Mean   :0.9627  
- 3rd Qu.:0.0000   3rd Qu.:1.000   3rd Qu.:1.0000   3rd Qu.:1.0000  
- Max.   :1.0000   Max.   :1.000   Max.   :1.0000   Max.   :1.0000  
-      BMI         PhysActivity         Sex              Age        
- Min.   :12.00   Min.   :0.0000   Min.   :0.0000   Min.   : 1.000  
- 1st Qu.:24.00   1st Qu.:1.0000   1st Qu.:0.0000   1st Qu.: 6.000  
- Median :27.00   Median :1.0000   Median :0.0000   Median : 8.000  
- Mean   :28.38   Mean   :0.7565   Mean   :0.4403   Mean   : 8.032  
- 3rd Qu.:31.00   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:10.000  
- Max.   :98.00   Max.   :1.0000   Max.   :1.0000   Max.   :13.000  </code></pre>
+<pre><code> Diabetes_binary      HighBP         HighChol           BMI       
+ Min.   :0.0000   Min.   :0.000   Min.   :0.0000   Min.   :12.00  
+ 1st Qu.:0.0000   1st Qu.:0.000   1st Qu.:0.0000   1st Qu.:24.00  
+ Median :0.0000   Median :0.000   Median :0.0000   Median :27.00  
+ Mean   :0.1393   Mean   :0.429   Mean   :0.4241   Mean   :28.38  
+ 3rd Qu.:0.0000   3rd Qu.:1.000   3rd Qu.:1.0000   3rd Qu.:31.00  
+ Max.   :1.0000   Max.   :1.000   Max.   :1.0000   Max.   :98.00  
+  PhysActivity         Sex              Age        
+ Min.   :0.0000   Min.   :0.0000   Min.   : 1.000  
+ 1st Qu.:1.0000   1st Qu.:0.0000   1st Qu.: 6.000  
+ Median :1.0000   Median :0.0000   Median : 8.000  
+ Mean   :0.7565   Mean   :0.4403   Mean   : 8.032  
+ 3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:10.000  
+ Max.   :1.0000   Max.   :1.0000   Max.   :13.000  </code></pre>
 </div>
 </div>
 <p><strong>Every variable except BMI and Age are binary, as indicated CDC’s dataset description as well as by the min and max values.</strong></p>
@@ -272,10 +268,10 @@ dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke,...
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">is.na</span>() <span class="sc">|&gt;</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colSums</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Diabetes_binary          HighBP        HighChol       CholCheck             BMI 
+<pre><code>Diabetes_binary          HighBP        HighChol             BMI    PhysActivity 
               0               0               0               0               0 
-   PhysActivity             Sex             Age 
-              0               0               0 </code></pre>
+            Sex             Age 
+              0               0 </code></pre>
 </div>
 </div>
 <p><strong>There are no missing values in this dataset.</strong></p>
@@ -289,46 +285,42 @@ dbl (22): Diabetes_binary, HighBP, HighChol, CholCheck, BMI, Smoker, Stroke,...
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">diabetes =</span> <span class="fu">as.factor</span>(Diabetes_binary),</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">high_bp =</span> <span class="fu">as.factor</span>(HighBP),</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">high_chol =</span> <span class="fu">as.factor</span>(HighChol),</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">chol_check =</span> <span class="fu">as.factor</span>(CholCheck),</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">physical_act =</span> <span class="fu">as.factor</span>(PhysActivity),</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">sex =</span> <span class="fu">as.factor</span>(Sex),</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">age =</span> <span class="fu">as.factor</span>(Age),</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Recoding factor levels to change the names of the values </span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">diabetes =</span> <span class="fu">fct_recode</span>(diabetes,</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>                          <span class="st">`</span><span class="at">No Diabetes</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"0"</span>,</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>                          <span class="at">Diabetes =</span> <span class="st">"1"</span>),</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">high_bp =</span> <span class="fu">fct_recode</span>(high_bp,</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>                         <span class="at">No =</span> <span class="st">"0"</span>,</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>                         <span class="at">Yes =</span> <span class="st">"1"</span>),</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">high_chol =</span> <span class="fu">fct_recode</span>(high_chol,</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>                           <span class="at">No =</span> <span class="st">"0"</span>,</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>                           <span class="at">Yes =</span> <span class="st">"1"</span>),</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">chol_check =</span> <span class="fu">fct_recode</span>(chol_check,</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>                            <span class="at">No =</span> <span class="st">"0"</span>,</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>                            <span class="at">Yes =</span> <span class="st">"1"</span>),</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">physical_act =</span> <span class="fu">fct_recode</span>(physical_act,</span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>                              <span class="at">No =</span> <span class="st">"0"</span>,</span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>                              <span class="at">Yes =</span> <span class="st">"1"</span>),</span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">sex =</span> <span class="fu">fct_recode</span>(sex,</span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Female =</span> <span class="st">"0"</span>,</span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Male =</span> <span class="st">"1"</span>),</span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">age =</span> <span class="fu">fct_recode</span>(age,</span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">18-24</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"1"</span>,</span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">25-29</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"2"</span>,</span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">30-34</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"3"</span>,</span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">35-39</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"4"</span>,</span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">40-44</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"5"</span>,</span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">45-49</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"6"</span>,</span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">50-54</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"7"</span>,</span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">55-59</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"8"</span>,</span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">60-64</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"9"</span>,</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">65-69</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"10"</span>,</span>
-<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">70-74</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"11"</span>,</span>
-<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">75-79</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"12"</span>,</span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">80_or_older</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"13"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Removing most original variables</span></span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>Diabetes_binary, <span class="sc">-</span>HighBP, <span class="sc">-</span>HighChol, <span class="sc">-</span>CholCheck, <span class="sc">-</span>PhysActivity, <span class="sc">-</span>Sex, <span class="sc">-</span>Age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">physical_act =</span> <span class="fu">as.factor</span>(PhysActivity),</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">sex =</span> <span class="fu">as.factor</span>(Sex),</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">age =</span> <span class="fu">as.factor</span>(Age),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Recoding factor levels to change the names of the values </span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">diabetes =</span> <span class="fu">fct_recode</span>(diabetes,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>                          <span class="st">`</span><span class="at">No Diabetes</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"0"</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>                          <span class="at">Diabetes =</span> <span class="st">"1"</span>),</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">high_bp =</span> <span class="fu">fct_recode</span>(high_bp,</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>                         <span class="at">No =</span> <span class="st">"0"</span>,</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>                         <span class="at">Yes =</span> <span class="st">"1"</span>),</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">high_chol =</span> <span class="fu">fct_recode</span>(high_chol,</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>                           <span class="at">No =</span> <span class="st">"0"</span>,</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>                           <span class="at">Yes =</span> <span class="st">"1"</span>),</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">physical_act =</span> <span class="fu">fct_recode</span>(physical_act,</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>                              <span class="at">No =</span> <span class="st">"0"</span>,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>                              <span class="at">Yes =</span> <span class="st">"1"</span>),</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">sex =</span> <span class="fu">fct_recode</span>(sex,</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Female =</span> <span class="st">"0"</span>,</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Male =</span> <span class="st">"1"</span>),</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">age =</span> <span class="fu">fct_recode</span>(age,</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">18-24</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"1"</span>,</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">25-29</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"2"</span>,</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">30-34</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"3"</span>,</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">35-39</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"4"</span>,</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">40-44</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"5"</span>,</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">45-49</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"6"</span>,</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">50-54</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"7"</span>,</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">55-59</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"8"</span>,</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">60-64</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"9"</span>,</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">65-69</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"10"</span>,</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">70-74</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"11"</span>,</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">75-79</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"12"</span>,</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>                     <span class="st">`</span><span class="at">80_or_older</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"13"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Removing most original variables</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>Diabetes_binary, <span class="sc">-</span>HighBP, <span class="sc">-</span>HighChol, <span class="sc">-</span>PhysActivity, <span class="sc">-</span>Sex, <span class="sc">-</span>Age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="investigating-distributions" class="level4">
@@ -535,7 +527,7 @@ diabetes      75-79 80_or_older
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Proportional bar plot for Diabetes by Sex and Blood pressure</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> diabetes, <span class="at">fill =</span> high_bp)) <span class="sc">+</span></span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Proportion of Diabetes by Physical Activity and Age"</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Proportion of Diabetes by Sex and High"</span>,</span>
 <span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Diabetes?"</span>,</span>
 <span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Proportion"</span>) <span class="sc">+</span></span>
 <span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"skyblue"</span>, <span class="st">"salmon"</span>)) <span class="sc">+</span></span>

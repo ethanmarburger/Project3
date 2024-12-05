@@ -323,4 +323,4 @@ rf_final_fit |>
 
 **Best model: Random Forest**
 
-**The Random Forest model has a slightly better log-loss estimate of 0.334 while the Classification Tree model has a log-loss estimate of 0.349**
+**The Random Forest model has a slightly better log-loss estimate of 0.335 while the Classification Tree model has a log-loss estimate of 0.349**
