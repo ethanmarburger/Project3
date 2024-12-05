@@ -14,7 +14,7 @@ data_api <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
 
 # Selecting desired vairables
 data_api <- data_api |>
-  select(Diabetes_binary, HighBP, HighChol, CholCheck, BMI, PhysActivity, Sex, Age)
+  select(Diabetes_binary, HighBP, HighChol, BMI, PhysActivity, Sex, Age)
 
 # Applying transformations to dataset
 data_api <- data_api |>
@@ -23,7 +23,6 @@ data_api <- data_api |>
     diabetes = as.factor(Diabetes_binary),
     high_bp = as.factor(HighBP),
     high_chol = as.factor(HighChol),
-    chol_check = as.factor(CholCheck),
     physical_act = as.factor(PhysActivity),
     sex = as.factor(Sex),
     age = as.factor(Age),
@@ -38,9 +37,6 @@ data_api <- data_api |>
     high_chol = fct_recode(high_chol,
                            No = "0",
                            Yes = "1"),
-    chol_check = fct_recode(chol_check,
-                            No = "0",
-                            Yes = "1"),
     physical_act = fct_recode(physical_act,
                               No = "0",
                               Yes = "1"),
@@ -62,13 +58,13 @@ data_api <- data_api |>
                      `75-79` = "12",
                      `80_or_older` = "13")) |>
   # Removing most original variables
-  select(-Diabetes_binary, -HighBP, -HighChol, -CholCheck, -PhysActivity, -Sex, -Age)
+  select(-Diabetes_binary, -HighBP, -HighChol, -PhysActivity, -Sex, -Age)
 
 # Setting a seed to make things reproducible
 set.seed(23)
 
 # tidy models to split the data into a training and test set (70/30 split)
-data_split_api <- initial_split(data_api, prop = 0.70)
+data_split_api <- initial_split(data_api, prop = 0.70, strata = diabetes)
 data_train_api <- training(data_split)
 data_test_api <- testing(data_split)
 
@@ -77,7 +73,7 @@ data_5_fold_api <- vfold_cv(data_train, 5)
 
 # Creating a recipe for data processing
 rec_api <- recipe(diabetes ~ ., data = data_api) |>
-  step_dummy(high_bp, high_chol, chol_check, physical_act, sex, age) |>
+  step_dummy(high_bp, high_chol, physical_act, sex, age) |>
   step_normalize(BMI)
 
 # Random forest model instance
@@ -148,9 +144,9 @@ function(high_bp = "Yes", high_chol = "Yes", chol_check = "Yes",
 }
 
 # Example function calls to test the endpoint:
-# 1. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=28.5&high_bp=No&high_chol=Yes&chol_check=Yes&physical_act=No&sex=Male&age=45-49"
-# 2. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=31.0&high_bp=Yes&high_chol=Yes&chol_check=No&physical_act=Yes&sex=Female&age=35-39"
-# 3. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=27.0&high_bp=No&high_chol=No&chol_check=Yes&physical_act=Yes&sex=Male&age=18-24"
+# 1. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=30&high_bp=No&high_chol=Yes&chol_check=Yes&physical_act=No&sex=Male&age=45-49"
+# 2. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=20&high_bp=Yes&high_chol=Yes&chol_check=No&physical_act=Yes&sex=Female&age=35-39"
+# 3. curl -X POST "http://127.0.0.1:8000/predict" -d "BMI=40&high_bp=No&high_chol=No&chol_check=Yes&physical_act=Yes&sex=Male&age=18-24"
 
 
 

@@ -45,11 +45,6 @@ Yes = high blood pressure
 No = no high cholesterol\
 Yes = high cholesterol
 
-**chol_check**: If subject has had their cholesterol checked in the past 5 years.
-
-No = cholesterol not check in past 5 years\
-Yes = cholesterol checked in past 5 years
-
 **BMI**: Body Mass Index.
 
 **physical_act**: Physical activity in past 30 days - not including job.
@@ -85,6 +80,62 @@ The goal of this file is to create models for predicting the diabetes variable. 
 
 ## Predictive Modeling Set up
 
+```{r}
+#| echo: true
+#| include: false
+# Reading in data and applying transformations for modeling
+# Reading in Data
+data_2 <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+
+# Selecting desired vairables
+data_2 <- data_2 |>
+  select(Diabetes_binary, HighBP, HighChol, BMI, PhysActivity, Sex, Age)
+
+# Applying transformations to dataset
+data_2 <- data_2 |>
+  mutate(
+    # Converting most variables to factors
+    diabetes = as.factor(Diabetes_binary),
+    high_bp = as.factor(HighBP),
+    high_chol = as.factor(HighChol),
+    physical_act = as.factor(PhysActivity),
+    sex = as.factor(Sex),
+    age = as.factor(Age),
+    
+    # Recoding factor levels to change the names of the values 
+    diabetes = fct_recode(diabetes,
+                          `No Diabetes` = "0",
+                          Diabetes = "1"),
+    high_bp = fct_recode(high_bp,
+                         No = "0",
+                         Yes = "1"),
+    high_chol = fct_recode(high_chol,
+                           No = "0",
+                           Yes = "1"),
+    physical_act = fct_recode(physical_act,
+                              No = "0",
+                              Yes = "1"),
+    sex = fct_recode(sex,
+                     Female = "0",
+                     Male = "1"),
+    age = fct_recode(age,
+                     `18-24` = "1",
+                     `25-29` = "2",
+                     `30-34` = "3",
+                     `35-39` = "4",
+                     `40-44` = "5",
+                     `45-49` = "6",
+                     `50-54` = "7",
+                     `55-59` = "8",
+                     `60-64` = "9",
+                     `65-69` = "10",
+                     `70-74` = "11",
+                     `75-79` = "12",
+                     `80_or_older` = "13")) |>
+  # Removing most original variables
+  select(-Diabetes_binary, -HighBP, -HighChol, -PhysActivity, -Sex, -Age)
+```
+
 ### Splitting Data into Training and Test Sets
 
 ```{r}
@@ -92,7 +143,7 @@ The goal of this file is to create models for predicting the diabetes variable. 
 set.seed(23)
 
 # tidy models to split the data into a training and test set (70/30 split)
-data_split <- initial_split(data, prop = 0.70)
+data_split <- initial_split(data_2, prop = 0.70, strata = diabetes)
 data_train <- training(data_split)
 data_test <- testing(data_split)
 
@@ -103,14 +154,14 @@ data_5_fold <- vfold_cv(data_train, 5)
 ### Create our Recipe for Data Preprocessing
 
 ```{r}
-rec <- recipe(diabetes ~ ., data = data) |>
-  step_dummy(high_bp, high_chol, chol_check, physical_act, sex, age) |>
+rec <- recipe(diabetes ~ ., data = data_2) |>
+  step_dummy(high_bp, high_chol, physical_act, sex, age) |>
   step_normalize(BMI)
 ```
 
 ## Fitting a tuned Classification Tree model
 
-### What's a Classification Tree model? 
+### What's a Classification Tree model?
 
 Classification Trees are a type of decision tree model specifically designed for problems where the response variable is categorical, meaning it takes on discrete values, such as classes or labels. While similar in structure and approach to regression trees, which predict continuous numerical outcomes, classification trees aim to assign data points to specific categories based on the most prevalent class in a region.
 
@@ -118,7 +169,7 @@ Classification Trees are a type of decision tree model specifically designed for
 
 ```{r}
 class_tree_mod <- decision_tree(tree_depth = tune(), # Tuning parameters
-                          min_n = 15,
+                          min_n = 10,
                           cost_complexity = tune()) |>
   set_engine("rpart") |>
   set_mode("classification") # To classify the best predictor
@@ -138,7 +189,7 @@ class_tree_wkf <- workflow() |>
 classification_grid <- class_tree_wkf |>
   tune_grid(resamples = data_5_fold,
             grid = grid_regular(tree_depth(), cost_complexity(), levels = 10),
-            metrics = metric_set(mn_log_loss)) # Corrected metric
+            metrics = metric_set(mn_log_loss)) # Model metric
 ```
 
 ### Collecting the metrics computed across the folds for each tuning parameter
@@ -180,7 +231,7 @@ classification_extract_final_model
 
 ## Fitting a tuned Random Forest model
 
-### What's a Random Forest model? 
+### What's a Random Forest model?
 
 Random Forest models are an ensemble learning technique that builds upon the idea of bagged (bootstrap aggregated) tree models. They are designed to improve prediction accuracy and robustness while reducing overfitting. Random Forest models achieve this by combining multiple decision trees trained on bootstrap samples of the data and introducing randomness in the predictor selection process at each split.
 
@@ -251,7 +302,8 @@ rf_final_fit |>
 rf_final_model <- extract_fit_engine(rf_final_fit) 
 rf_final_model
 ```
-## Comparing Best Models fit to entire training set. 
+
+## Comparing Best Models fit to entire training set.
 
 ### Best Classification Tree Model
 
@@ -271,4 +323,4 @@ rf_final_fit |>
 
 **Best model: Random Forest**
 
-**The Random Forest model has a slightly better log-loss estimate of 0.339 while the Classification Tree model has a log-loss estimate of 0.358 (rounded)**
+**The Random Forest model has a slightly better log-loss estimate of 0.334 while the Classification Tree model has a log-loss estimate of 0.349**

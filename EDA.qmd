@@ -29,11 +29,6 @@ The data for this project is from **Diabetes Health Indicators Dataset**. This d
 0 = no high cholesterol\
 1 = high cholesterol
 
-**CholCheck**: If subject has had their cholesterol checked in the past 5 years.
-
-0 = no cholesterol check in 5 years\
-1 = yes cholesterol check in 5 years
-
 **BMI**: Body Mass Index.
 
 **PhysActivity**: Physical activity in past 30 days - not including job.
@@ -79,6 +74,7 @@ library(readr)
 library(ggplot2)
 library(tidyverse)
 library(forcats)
+library(dplyr)
 ```
 
 ```{r}
@@ -90,7 +86,7 @@ data <- read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
 ```{r}
 # Selecting chosen variables
 data <- data |>
-  select(Diabetes_binary, HighBP, HighChol, CholCheck, BMI, PhysActivity, Sex, Age)
+  select(Diabetes_binary, HighBP, HighChol, BMI, PhysActivity, Sex, Age)
 ```
 
 ### Exploratory Data Analysis
@@ -141,7 +137,6 @@ data <- data |>
     diabetes = as.factor(Diabetes_binary),
     high_bp = as.factor(HighBP),
     high_chol = as.factor(HighChol),
-    chol_check = as.factor(CholCheck),
     physical_act = as.factor(PhysActivity),
     sex = as.factor(Sex),
     age = as.factor(Age),
@@ -156,9 +151,6 @@ data <- data |>
     high_chol = fct_recode(high_chol,
                            No = "0",
                            Yes = "1"),
-    chol_check = fct_recode(chol_check,
-                            No = "0",
-                            Yes = "1"),
     physical_act = fct_recode(physical_act,
                               No = "0",
                               Yes = "1"),
@@ -180,7 +172,7 @@ data <- data |>
                      `75-79` = "12",
                      `80_or_older` = "13")) |>
   # Removing most original variables
-  select(-Diabetes_binary, -HighBP, -HighChol, -CholCheck, -PhysActivity, -Sex, -Age)
+  select(-Diabetes_binary, -HighBP, -HighChol, -PhysActivity, -Sex, -Age)
 ```
 
 #### Investigating Distributions
@@ -198,7 +190,7 @@ table("diabetes" = data$diabetes,
       "High Blood Pressure" = data$high_bp)
 ```
 
-**Roughly 62% of subjects without diabetes reported no high blood pressure and roughly 25% of subjects with diabetes reported no high blood pressure.***
+**Roughly 62% of subjects without diabetes reported no high blood pressure and roughly 25% of subjects with diabetes reported no high blood pressure.**\*
 
 ```{r}
 # Investigating the Response Variable and Cholesterol
@@ -214,7 +206,7 @@ table("diabetes" = data$diabetes,
       "Sex" = data$sex)
 ```
 
-**The difference between males and females with diabetes in this study is roughly 1,500 people. In a dataset consisting of 253,680 people, this is exteremely close.**
+**The difference between males and females with diabetes in this study is roughly 1,500 people. In a dataset consisting of 253,680 people, this is extremely close.**
 
 ```{r}
 # Investigating the Response Variable by Sex and Blood Pressure
@@ -231,7 +223,7 @@ table("diabetes" = data$diabetes,
       "Age Range" = data$age)
 ```
 
-**Subjects in the age range of 65-69 made up the largest group of individuals with diabetes.** 
+**Subjects in the age range of 65-69 made up the largest group of individuals with diabetes.**
 
 ```{r}
 # Measure of center and spread for BMI grouped by diabetes
@@ -287,7 +279,7 @@ ggplot(data, aes(x = diabetes, fill = physical_act)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-**It's interesting, and unsurprising, that individuals with diabetes engage in less physical activity.** 
+**It's interesting, and unsurprising, that individuals with diabetes engage in less physical activity.**
 
 ```{r}
 ggplot(data, aes(x = diabetes, y = BMI)) +
@@ -320,7 +312,7 @@ ggplot(data, aes(x = diabetes, fill = physical_act)) +
 # Proportional bar plot for Diabetes by Sex and Blood pressure
 ggplot(data, aes(x = diabetes, fill = high_bp)) +
   geom_bar(position = "fill") +
-  labs(title = "Proportion of Diabetes by Physical Activity and Age",
+  labs(title = "Proportion of Diabetes by Sex and High",
        x = "Diabetes?",
        y = "Proportion") +
   scale_fill_manual(values = c("skyblue", "salmon")) +
@@ -329,3 +321,5 @@ ggplot(data, aes(x = diabetes, fill = high_bp)) +
 ```
 
 **It's interesting that the proportions of males and females with and without diabetes are similar.**
+
+### [Click here for the Modeling Page](modeling.html)
